@@ -1,0 +1,18 @@
+#applet-container {
+    margin: 50px !important;
+
+    background-color: #2E3440;
+}
+
+#applet-menu {
+    background-color: #3B4252;
+}
+
+#applet-menu .popup-menu-item {
+    padding: 8px 16px;
+    color: white;
+}
+
+#applet-menu .popup-menu-item:hover {
+    background-color: #4C566A;
+}
