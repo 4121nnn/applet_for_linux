@@ -2,6 +2,8 @@ const Applet = imports.ui.applet;
 const PopupMenu = imports.ui.popupMenu;
 const Util = imports.misc.util;
 const Clutter = imports.gi.Clutter;
+const Main = imports.ui.main;  // Import Main for keybinding manager
+const Lang = imports.lang;      // Import Lang for binding methods
 
 function MyApplet(orientation) {
     this._init(orientation);
@@ -12,7 +14,7 @@ var CommandConstants = new function() {
     this.COMMAND_OPEN_GOLAND = "goland";
     this.COMMAND_OPEN_CHROME = "google-chrome";
     this.COMMAND_OPEN_POSTMAN = "postman";
-}
+};
 
 MyApplet.prototype = {
     __proto__: Applet.IconApplet.prototype,
@@ -27,6 +29,7 @@ MyApplet.prototype = {
         this.menu = new Applet.AppletPopupMenu(this, orientation);
         this.menuManager.addMenu(this.menu);
 
+        // Adding menu items for applications
         this.menu.addAction("IntelliJ IDEA", () => {
             Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_IDEA);
         });
@@ -40,30 +43,52 @@ MyApplet.prototype = {
             Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_CHROME);
         });
 
-        this.actor.connect('key-press-event', (actor, event) => this._onKeyPress(event));
+        // Connect the menu's 'open-state-changed' signal to enable/disable hotkeys
+        this.menu.connect('open-state-changed', (menu, isOpen) => {
+            if (isOpen) {
+                this._registerHotKeys();
+            } else {
+                this._unregisterHotKeys();
+            }
+        });
+
+        // Connect to applet click to toggle the menu
+        this.actor.connect('button-press-event', () => {
+            this.menu.toggle();
+        });
     },
 
-    _onKeyPress: function(event) {
-        let symbol = event.get_key_symbol();
-
-        switch (symbol) {
-            case Clutter.KEY_I:
-                Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_IDEA);
-                return true;
-            case Clutter.KEY_G:
-                Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_GOLAND);
-                return true;
-            case Clutter.KEY_C:
-                Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_CHROME);
-                return true;
-            case Clutter.KEY_P:
-                Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_POSTMAN);
-                return true;
-            default:
-                return false;
-        }
+    _registerHotKeys: function() {
+        // Add hotkeys for each command
+        Main.keybindingManager.addHotKey('open-idea', 'i', Lang.bind(this, this._onOpenIdea));
+        Main.keybindingManager.addHotKey('open-goland', 'g', Lang.bind(this, this._onOpenGoLand));
+        Main.keybindingManager.addHotKey('open-chrome', 'c', Lang.bind(this, this._onOpenChrome));
+        Main.keybindingManager.addHotKey('open-postman', 'p', Lang.bind(this, this._onOpenPostman));
     },
 
+    _unregisterHotKeys: function() {
+        // Remove hotkeys for each command
+        Main.keybindingManager.removeHotKey('open-idea');
+        Main.keybindingManager.removeHotKey('open-goland');
+        Main.keybindingManager.removeHotKey('open-chrome');
+        Main.keybindingManager.removeHotKey('open-postman');
+    },
+
+    _onOpenIdea: function() {
+        Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_IDEA);
+    },
+
+    _onOpenGoLand: function() {
+        Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_GOLAND);
+    },
+
+    _onOpenChrome: function() {
+        Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_CHROME);
+    },
+
+    _onOpenPostman: function() {
+        Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_POSTMAN);
+    },
 
     on_applet_clicked: function() {
         this.menu.toggle();

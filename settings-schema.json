@@ -1,0 +1,16 @@
+{
+  "head" : {
+    "type" : "header",
+    "description" : "Applet Settings"
+  },
+  "keybinding-project" : {
+    "type" : "keybinding",
+    "description" : "Keybinding, which open the RUST projects directory",
+    "default" : "<Primary><Alt>r"
+  },
+  "keybinding-documentation" : {
+    "type" : "keybinding",
+    "description" : "Keybinding, which open the documentation",
+    "default" : "<Primary><Alt>d"
+  }
+}
